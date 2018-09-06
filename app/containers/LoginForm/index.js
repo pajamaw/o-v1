@@ -40,24 +40,24 @@ export class LoginForm extends React.Component {
     event.preventDefault();
     console.log('A name was submitted: ', this.state);
     const data = new FormData();
-    data.append('user[email]', this.state.username);
-    data.append('user[password]', this.state.password);
+    data.append('user[email]',this.state.username);
+    data.append('user[password]',this.state.password);
 
-    const formData = {
-      method: 'POST',
+    const d = {
+      method: "post",
       body: data,
-    };
-    return fetch('https://beenverified.docker/api/v5/session', formData)
-      .then(resAccount => resAccount.json())
+      };
+    const postSession = (formData) => fetch('https://beenverified.docker/api/v5/session', formData);
+    return postSession(d).then(response => {
+        console.log(response)
+        return response.json()
+      })
       .then(resjson => {
+        console.log(resjson)
         const userCode = resjson.account.user_info.user_code;
-        document.cookie = `user_code=${userCode}; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";`;
         console.log('handle submit ran', resjson);
-        const getUserAccout = fetch(
-          'https://beenverified.docker/api/v5/account',
-        );
-        return getUserAccout
-          .then(response => response.json())
+        const getUserAccount = fetch('https://beenverified.docker/api/v5/account');
+        return getUserAccount.then(response => response.json())
           .then(res => {
             this.setState({
               firstName: res.account.user_info.first_name,
