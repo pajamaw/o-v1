@@ -7,7 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
@@ -21,15 +20,82 @@ import messages from './messages';
 
 /* eslint-disable react/prefer-stateless-function */
 export class LoginForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: '',
+      password: '',
+      firstName: '',
+      lastName: '',
+    };
+  }
+
+  handleChange = event => {
+    this.setState({
+      [event.target.name]: event.target.value,
+    });
+  };
+
+  handleSubmit = event => {
+    event.preventDefault();
+    console.log('A name was submitted: ', this.state);
+    const data = new FormData();
+    data.append('user[email]', this.state.username);
+    data.append('user[password]', this.state.password);
+
+    const formData = {
+      method: 'POST',
+      body: data,
+    };
+    return fetch('https://beenverified.docker/api/v5/session', formData)
+      .then(resAccount => resAccount.json())
+      .then(resjson => {
+        const userCode = resjson.account.user_info.user_code;
+        document.cookie = `user_code=${userCode}; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";`;
+        console.log('handle submit ran', resjson);
+        const getUserAccout = fetch(
+          'https://beenverified.docker/api/v5/account',
+        );
+        return getUserAccout
+          .then(response => response.json())
+          .then(res => {
+            this.setState({
+              firstName: res.account.user_info.first_name,
+              lastName: res.account.user_info.last_name,
+            });
+          })
+          .catch(err => {
+            console.log('account error', err);
+          });
+      })
+      .catch(err => {
+        console.log('session error', err);
+      });
+  };
+
   render() {
     return (
-      <div>
-        <Helmet>
-          <title>LoginForm</title>
-          <meta name="description" content="Description of LoginForm" />
-        </Helmet>
-        <FormattedMessage {...messages.header} />
-      </div>
+      <form onSubmit={this.handleSubmit}>
+        <label>
+          Username:
+          <input
+            type="text"
+            name="username"
+            value={this.state.username}
+            onChange={this.handleChange}
+          />
+        </label>
+        <label>
+          Password:
+          <input
+            type="text"
+            name="password"
+            value={this.state.password}
+            onChange={this.handleChange}
+          />
+        </label>
+        <input type="submit" value="Submit" />
+      </form>
     );
   }
 }
