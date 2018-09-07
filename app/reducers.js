@@ -8,6 +8,41 @@ import { LOCATION_CHANGE } from 'react-router-redux';
 
 import languageProviderReducer from 'containers/LanguageProvider/reducer';
 
+
+
+/*
+ * authReducer
+ *
+ * The reducer merges auth
+ *
+ */
+export const AUTH_REQUEST = 'AUTH_REQUEST';
+export const AUTH_SUCCESS = 'AUTH_SUCCESS';
+export const AUTH_FAILURE = 'AUTH_FAILURE';
+
+export const authorize = (login, password) => ({
+  type: AUTH_REQUEST,
+  payload: { login, password }
+});
+
+const authInitialState = {
+  session: localStorage.getItem('_beenverified3_session'),
+  error: null
+}
+
+export function authReducer(state = initialState, { type, payload }) {
+  switch (type) {
+    case AUTH_SUCCESS: {
+      return { ...state, session: payload };
+    }
+    case AUTH_FAILURE: {
+      return { ...state, error: payload };
+    }
+    default:
+      return state;
+  }
+};
+
 /*
  * routeReducer
  *
@@ -41,6 +76,7 @@ export function routeReducer(state = routeInitialState, action) {
  */
 export default function createReducer(injectedReducers) {
   return combineReducers({
+    auth: authReducer,
     route: routeReducer,
     language: languageProviderReducer,
     ...injectedReducers,

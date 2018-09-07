@@ -53,7 +53,6 @@ export class LoginForm extends React.Component {
         return response.json()
       })
       .then(resjson => {
-        console.log(resjson)
         const userCode = resjson.account.user_info.user_code;
         console.log('handle submit ran', resjson);
         const getUserAccount = fetch('https://beenverified.docker/api/v5/account');
